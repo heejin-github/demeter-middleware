@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
@@ -81,6 +82,8 @@ func handleAuth(c *gin.Context) {
 	backend := c.Query("backend")
 	path := c.Query("path")
 
+	log.Printf("Received request - API Key: %s, Backend: %s, Path: %s", apiKey, backend, path)
+
 	if !isValidAPIKey(apiKey) {
 		log.Printf("Invalid API key attempt: %s", apiKey)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid API key"})
@@ -104,6 +107,10 @@ func handleAuth(c *gin.Context) {
 		log.Printf("Error parsing target URL: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
+	}
+
+	if path != "" && !strings.HasPrefix(path, "/") {
+		path = "/" + path
 	}
 
 	log.Printf("Proxying request to %s%s", targetURL, path)

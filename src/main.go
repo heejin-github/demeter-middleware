@@ -32,13 +32,29 @@ func main() {
 					{
 						Name:  "generate",
 						Usage: "Generate a new API key",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:     "username",
+								Aliases:  []string{"u"},
+								Usage:    "Username for the API key",
+								Required: true,
+							},
+							&cli.StringFlag{
+								Name:     "protocol",
+								Aliases:  []string{"p"},
+								Usage:    "Protocol for the API key",
+								Required: true,
+							},
+						},
 						Action: func(c *cli.Context) error {
 							apiKey := generateAPIKey()
-							err := storeAPIKey(apiKey)
+							username := c.String("username")
+							protocol := c.String("protocol")
+							err := storeAPIKey(apiKey, username, protocol)
 							if err != nil {
 								return err
 							}
-							fmt.Printf("Generated API key: %s\n", apiKey)
+							fmt.Printf("Generated API key: %s for user: %s with protocol: %s\n", apiKey, username, protocol)
 							return nil
 						},
 					},
@@ -51,7 +67,8 @@ func main() {
 								return err
 							}
 							for _, key := range keys {
-								fmt.Println(key)
+								fmt.Printf("API Key: %s, Username: %s, Protocol: %s\n", key.Key, key.Username, key.Protocol)
+
 							}
 							return nil
 						},

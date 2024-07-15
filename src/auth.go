@@ -90,6 +90,15 @@ func handleAuth(c *gin.Context) {
 		return
 	}
 
+	username, protocol, err := getAPIKeyDetails(apiKey)
+	if err != nil {
+		log.Printf("Error retrieving API key details: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	log.Printf("API Key details - Username: %s, Protocol: %s", username, protocol)
+
 	var targetURL string
 	switch backend {
 	case "8545":

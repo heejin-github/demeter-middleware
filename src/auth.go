@@ -33,7 +33,7 @@ var (
 		[]string{"method", "endpoint"},
 	)
 
-	rateLimiter = rate.NewLimiter(rate.Every(time.Second), 10) // 10 requests per second
+	rateLimiter = rate.NewLimiter(rate.Every(time.Second), 10000) // 10000 requests per second
 )
 
 func init() {

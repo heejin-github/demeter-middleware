@@ -118,13 +118,29 @@ func handleAuth(c *gin.Context) {
 		return
 	}
 
-	if path != "" && !strings.HasPrefix(path, "/") {
-		path = "/" + path
+	decodedPath, err := url.QueryUnescape(path)
+	if err != nil {
+		log.Printf("Error decoding path: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid path"})
+		return
 	}
+
+	parts := strings.SplitN(decodedPath, "?", 2)
+	newPath := parts[0]
+	var newRawQuery string
+	if len(parts) > 1 {
+		newRawQuery = parts[1]
+	}
+
+	proxyURL := *remote
+	proxyURL.Path = newPath
+	proxyURL.RawQuery = newRawQuery
 
 	log.Printf("Proxying request to %s%s", targetURL, path)
 	proxy := httputil.NewSingleHostReverseProxy(remote)
-	c.Request.URL.Path = path
+	c.Request.URL = &proxyURL
+	c.Request.Host = proxyURL.Host
+
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
